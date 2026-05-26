@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NeuroVigilX</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06080f;--s1:#0b1120;--s2:#0e1929;
+  --cyan:#00c8ff;--red:#ff1f3d;--green:#00e87a;
+  --purple:#b06cff;--orange:#ff7043;--yellow:#ffc400;
+  --text:#dde6f0;--muted:#4a6080;--border:#162035;
+  --red2:#3d0010;
+}
+html,body{width:100%;min-height:100vh;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif}
+body{padding:10px}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--s1);border:1px solid var(--border);border-radius:14px;margin-bottom:12px;gap:10px;flex-wrap:wrap}
+.hdr-left{display:flex;align-items:center;gap:12px}
+.brand-name{font-size:22px;font-weight:900;letter-spacing:3px;line-height:1.1}
+.n{color:var(--cyan)}.v{color:var(--red)}.x{color:var(--red);font-size:27px}
+.brand-tag{font-size:9px;letter-spacing:3px;color:var(--muted);margin-top:2px}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.live-badge{display:flex;align-items:center;gap:5px;border:1px solid var(--green);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--green);font-weight:700;letter-spacing:1px;background:#001a0f}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+.clock{font-size:12px;color:var(--muted)}
+.alert-banner{background:var(--red2);border:1px solid var(--red);border-radius:10px;padding:11px 16px;display:flex;align-items:center;gap:10px;margin-bottom:12px;animation:aflash .55s infinite}
+.alert-banner.hidden{display:none;animation:none}
+@keyframes aflash{0%,100%{opacity:1}50%{opacity:.35}}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.mc{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px;position:relative;overflow:hidden}
+.mc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0}
+.mc.hr::before{background:linear-gradient(90deg,var(--red),var(--purple))}
+.mc.dist::before{background:linear-gradient(90deg,var(--cyan),#0055ff)}
+.mc.st::before{background:linear-gradient(90deg,var(--green),var(--cyan))}
+.mc.loc::before{background:linear-gradient(90deg,var(--purple),var(--orange))}
+.mlb{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+.mv{font-size:28px;font-weight:800;line-height:1}
+.mu{font-size:12px;font-weight:400;color:var(--muted);margin-left:2px}
+.ms{font-size:11px;color:var(--muted);margin-top:5px}
+.hrbar{height:3px;background:#1a2a40;border-radius:2px;margin-top:7px;overflow:hidden}
+.hrfill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--green),var(--yellow),var(--red));transition:width .5s ease;width:0%}
+.mid{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:12px}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px}
+.ctitle{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.cdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.chart-area{height:100px;display:flex;align-items:flex-end;gap:3px}
+.cbar{border-radius:3px 3px 0 0;transition:height .4s ease;min-height:3px;flex:1}
+.clegend{display:flex;gap:12px;margin-top:7px}
+.cleg{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted)}
+.clegdot{width:7px;height:7px;border-radius:2px}
+.status-big{font-size:24px;font-weight:900;margin:6px 0 2px;letter-spacing:2px}
+.sok{color:var(--green)}.sem{color:var(--red);animation:aflash .5s infinite}
+.tbar{height:8px;background:#1a2a40;border-radius:4px;overflow:hidden;margin-top:8px}
+.tfill{height:100%;border-radius:4px;transition:width .6s ease,background .6s ease}
+.mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}
+.mini-card{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center}
+.mini-val{font-size:20px;font-weight:800}
+.mini-lab{font-size:9px;letter-spacing:1.5px;color:var(--muted);margin-top:1px}
+.bottom{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ev-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.ev-row:last-child{border:none}
+.ev-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.ev-text{font-size:12px;flex:1}
+.ev-time{font-size:10px;color:var(--muted);white-space:nowrap}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
+.info-row:last-child{border:none}
+.info-lb{color:var(--muted)}
+.info-v{font-weight:600}
+@media(max-width:620px){
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .mid{grid-template-columns:1fr}
+  .bottom{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="alert-banner hidden" id="ab">
+  <svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 2L1 18h18L10 2z" fill="none" stroke="#ff1f3d" stroke-width="1.5"/><text x="10" y="15" text-anchor="middle" fill="#ff1f3d" font-size="9" font-weight="bold">!</text></svg>
+  <div>
+    <div style="font-size:13px;font-weight:700;color:var(--red);letter-spacing:1px">THREAT DETECTED — EMERGENCY STATE ACTIVE</div>
+    <div style="font-size:11px;color:#ff8fa3;margin-top:2px">Heart rate critical. WhatsApp alert dispatched via Twilio.</div>
+  </div>
+</div>
+
+<div class="hdr">
+  <div class="hdr-left">
+    <svg width="48" height="55" viewBox="0 0 100 115" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50 3 L92 18 L92 58 C92 82 72 100 50 112 C28 100 8 82 8 58 L8 18 Z" fill="#1a2a3a" stroke="url(#chrome)" stroke-width="3"/>
+      <clipPath id="lhalf"><rect x="8" y="3" width="42" height="112"/></clipPath>
+      <clipPath id="rhalf"><rect x="50" y="3" width="42" height="112"/></clipPath>
+      <path d="M50 5 L90 19 L90 58 C90 81 71 99 50 111 C29 99 10 81 10 58 L10 19 Z" fill="#041628" clip-path="url(#lhalf)"/>
+      <path d="M50 5 L90 19 L90 58 C90 81 71 99 50 111 C29 99 10 81 10 58 L10 19 Z" fill="#1a0410" clip-path="url(#rhalf)"/>
+      <line x1="50" y1="5" x2="50" y2="111" stroke="url(#centerglow)" stroke-width="1.5"/>
+      <path d="M44 20 C44 15 38 12 35 17 C32 22 34 28 38 29 C34 31 28 35 27 45 L27 55" stroke="#00c8ff" stroke-width="1.5" fill="none"/>
+      <path d="M56 20 C56 15 62 12 65 17 C68 22 66 28 62 29 C66 31 72 35 73 45 L73 55" stroke="#ff1f3d" stroke-width="1.5" fill="none"/>
+      <path d="M12 62 L24 62 L28 52 L33 72 L38 57 L43 62 L50 62 L57 62 L62 52 L67 72 L72 57 L77 62 L88 62" stroke="url(#ecg)" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M50 3 L92 18 L92 58 C92 82 72 100 50 112 C28 100 8 82 8 58 L8 18 Z" fill="none" stroke="url(#chrome)" stroke-width="2.5"/>
+      <defs>
+        <linearGradient id="chrome" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#8ab4d4"/>
+          <stop offset="40%" stop-color="#c8dff0"/>
+          <stop offset="100%" stop-color="#4a7a9a"/>
+        </linearGradient>
+        <linearGradient id="centerglow" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#00c8ff" stop-opacity=".9"/>
+          <stop offset="100%" stop-color="#ff1f3d" stop-opacity=".9"/>
+        </linearGradient>
+        <linearGradient id="ecg" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#00c8ff"/>
+          <stop offset="50%" stop-color="#ffffff"/>
+          <stop offset="100%" stop-color="#ff1f3d"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <div>
+      <div class="brand-name"><span class="n">NEURO</span><span class="v">VIGIL</span><span class="x">X</span></div>
+      <div class="brand-tag">DETECT &middot; PROTECT &middot; ALERT</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+</div>
+
+<div class="metrics">
+  <div class="mc hr">
+    <div class="mlb">Heart Rate</div>
+    <div class="mv" style="color:var(--red)" id="hr-val">--<span class="mu">bpm</span></div>
+    <div class="hrbar"><div class="hrfill" id="hr-bar"></div></div>
+    <div class="ms" id="hr-sub">Awaiting signal...</div>
+  </div>
+  <div class="mc dist">
+    <div class="mlb">Distance</div>
+    <div class="mv" style="color:var(--cyan)" id="dist-val">--<span class="mu">cm</span></div>
+    <div class="ms">HC-SR04 ultrasonic</div>
+  </div>
+  <div class="mc st">
+    <div class="mlb">System Status</div>
+    <div class="mv sok" id="sv" style="font-size:18px;margin-top:4px">--</div>
+    <div class="ms" id="ss">Initializing...</div>
+  </div>
+  <div class="mc loc">
+    <div class="mlb">GPS Location</div>
+    <div class="mv" id="lat-val" style="color:var(--purple);font-size:16px;margin-top:6px">--</div>
+    <div class="ms">Latitude coordinate</div>
+  </div>
+</div>
+
+<div class="mid">
+  <div class="card">
+    <div class="ctitle"><div class="cdot" style="background:var(--red)"></div>HEART RATE HISTORY — LAST 20 READINGS<span style="margin-left:auto;font-size:10px" id="avg-label"></span></div>
+    <div class="chart-area" id="chart-area">
+      <div style="color:var(--muted);font-size:12px;align-self:center;width:100%;text-align:center">Waiting for readings...</div>
+    </div>
+    <div class="clegend">
+      <div class="cleg"><div class="clegdot" style="background:var(--green)"></div>Normal</div>
+      <div class="cleg"><div class="clegdot" style="background:var(--yellow)"></div>Elevated</div>
+      <div class="cleg"><div class="clegdot" style="background:var(--red)"></div>Critical</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle"><div class="cdot" style="background:var(--purple)"></div>THREAT LEVEL</div>
+    <div class="status-big sok" id="status-big">SECURE</div>
+    <div style="font-size:11px;color:var(--muted)" id="status-sub">All sensors nominal</div>
+    <div style="font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:10px;margin-bottom:4px">THREAT INDEX</div>
+    <div class="tbar"><div class="tfill" id="threat-fill" style="background:var(--green);width:0%"></div></div>
+    <div class="mini-grid">
+      <div class="mini-card"><div class="mini-val" style="color:var(--red)" id="alert-count">0</div><div class="mini-lab">ALERTS</div></div>
+      <div class="mini-card"><div class="mini-val" style="color:var(--cyan)" id="ping-count">0</div><div class="mini-lab">PINGS</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom">
+  <div class="card">
+    <div class="ctitle"><div class="cdot" style="background:var(--cyan)"></div>SYSTEM EVENTS</div>
+    <div id="events-list">
+      <div class="ev-row"><div class="ev-dot" style="background:var(--green)"></div><div class="ev-text">NeuroVigilX initialized</div><div class="ev-time" id="start-time">--</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle"><div class="cdot" style="background:var(--orange)"></div>DEVICE TELEMETRY</div>
+    <div class="info-row"><div class="info-lb">Device</div><div class="info-v" style="color:var(--cyan)">ESP32 Wokwi</div></div>
+    <div class="info-row"><div class="info-lb">Endpoint</div><div class="info-v" style="color:var(--muted);font-size:11px">/secure-sos</div></div>
+    <div class="info-row"><div class="info-lb">Token</div><div class="info-v" style="color:var(--green)">VERIFIED</div></div>
+    <div class="info-row"><div class="info-lb">Alerts</div><div class="info-v" style="color:var(--green)">WhatsApp via Twilio</div></div>
+    <div class="info-row"><div class="info-lb">Refresh</div><div class="info-v">2 seconds</div></div>
+    <div class="info-row"><div class="info-lb">Last ping</div><div class="info-v" style="color:var(--cyan)" id="lp">--</div></div>
+  </div>
+</div>
+
+<script>
+var BASE = "http://tejashwinirreddy-neurovigilix-132.flowfuse.cloud";
+var hist=[],alertCount=0,pingCount=0,events=[],wasEmergency=false;
+document.getElementById('start-time').textContent = new Date().toLocaleTimeString();
+setInterval(function(){ document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
+
+function addEvent(text, color) {
+  var t = new Date().toLocaleTimeString();
+  events.unshift({text:text, color:color, time:t});
+  if (events.length > 6) events.pop();
+  document.getElementById('events-list').innerHTML = events.map(function(e){
+    return '<div class="ev-row"><div class="ev-dot" style="background:'+e.color+'"></div><div class="ev-text">'+e.text+'</div><div class="ev-time">'+e.time+'</div></div>';
+  }).join('');
+}
+
+function renderChart() {
+  if (!hist.length) return;
+  var max = Math.max.apply(null, hist.concat([180]));
+  document.getElementById('chart-area').innerHTML = hist.map(function(v){
+    var pct = Math.round((v/max)*100);
+    var col = v>150?'#ff1f3d':v>120?'#ffc400':'#00e87a';
+    return '<div class="cbar" style="height:'+pct+'%;background:'+col+'" title="'+v+' bpm"></div>';
+  }).join('');
+  var avg = Math.round(hist.reduce(function(a,b){return a+b;},0)/hist.length);
+  document.getElementById('avg-label').textContent = 'avg ' + avg + ' bpm';
+}
+
+function fetchData() {
+  fetch(BASE + '/get-data')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var hr   = data.heartRate || 0;
+      var lat  = data.lat  || 0;
+      var dist = data.dist || 0;
+
+      pingCount++;
+      document.getElementById('ping-count').textContent = pingCount;
+      document.getElementById('lp').textContent = new Date().toLocaleTimeString();
+      document.getElementById('hr-val').innerHTML  = hr   + '<span class="mu">bpm</span>';
+      document.getElementById('dist-val').innerHTML = dist + '<span class="mu">cm</span>';
+      document.getElementById('lat-val').textContent = lat;
+      document.getElementById('hr-bar').style.width = Math.min(Math.round((hr/180)*100),100) + '%';
+      document.getElementById('hr-sub').textContent =
+        hr>150 ? 'CRITICAL — very high' :
+        hr>120 ? 'ELEVATED — monitor closely' :
+        hr<60  ? 'LOW — check patient' : 'Normal range 60–120';
+
+      hist.push(hr);
+      if (hist.length > 20) hist.shift();
+      renderChart();
+
+      var isEm = (hr > 120 && dist < 15) || data.sos === true;
+      var threat = Math.min(Math.round((hr/180)*100), 100);
+      document.getElementById('threat-fill').style.width = threat + '%';
+      document.getElementById('threat-fill').style.background = isEm ? '#ff1f3d' : hr>100 ? '#ffc400' : '#00e87a';
+      document.getElementById('ab').className = 'alert-banner' + (isEm ? '' : ' hidden');
+
+      var sbig = document.getElementById('status-big');
+      sbig.textContent = isEm ? 'EMERGENCY' : 'SECURE';
+      sbig.className = 'status-big ' + (isEm ? 'sem' : 'sok');
+
+      var sv = document.getElementById('sv');
+      sv.textContent = isEm ? 'EMERGENCY' : 'SECURE';
+      sv.className = 'mv ' + (isEm ? 'sem' : 'sok');
+
+      document.getElementById('ss').textContent = isEm ? 'THREAT ACTIVE — escalating' : 'All sensors nominal';
+      document.getElementById('status-sub').textContent = isEm ? 'THREAT ACTIVE' : 'All sensors nominal';
+
+      if (isEm && !wasEmergency) {
+        alertCount++;
+        document.getElementById('alert-count').textContent = alertCount;
+        addEvent('🚨 Emergency — HR: ' + hr + ' bpm, Dist: ' + dist + 'cm', '#ff1f3d');
+      }
+      if (!isEm && wasEmergency) addEvent('✅ System returned to secure state', '#00e87a');
+      wasEmergency = isEm;
+    })
+    .catch(function(){ document.getElementById('lp').textContent = 'NO SIGNAL'; });
+}
+
+addEvent('Dashboard connected to FlowFuse', '#00c8ff');
+setInterval(fetchData, 2000);
+fetchData();
+</script>
+</body>
+</html>
