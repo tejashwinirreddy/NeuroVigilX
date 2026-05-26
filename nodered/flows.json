@@ -1,0 +1,107 @@
+[
+  {
+    "id": "flow1",
+    "type": "tab",
+    "label": "NeuroVigilX"
+  },
+  {
+    "id": "http_in_sos",
+    "type": "http in",
+    "z": "flow1",
+    "name": "POST /secure-sos",
+    "url": "/secure-sos",
+    "method": "post",
+    "wires": [["store_fn", "http_res_sos"]]
+  },
+  {
+    "id": "store_fn",
+    "type": "function",
+    "z": "flow1",
+    "name": "store + emergency check",
+    "func": "flow.set('sensorData', msg.payload);\n\nvar hr   = msg.payload.heartRate;\nvar dist = msg.payload.dist;\nvar sos  = msg.payload.sos;\nvar isEmergency = (hr > 120 && dist < 15) || sos === true;\n\nif (isEmergency) {\n  var lastAlert = flow.get('lastAlert') || 0;\n  var now = Date.now();\n  if (now - lastAlert > 60000) {\n    flow.set('lastAlert', now);\n    msg.emergency = true;\n  }\n}\nreturn msg;",
+    "wires": [["whatsapp_fn"]]
+  },
+  {
+    "id": "whatsapp_fn",
+    "type": "function",
+    "z": "flow1",
+    "name": "build whatsapp request",
+    "func": "if (!msg.emergency) return null;\n\nvar accountSid = 'YOUR_ACCOUNT_SID';\nvar authToken  = 'YOUR_AUTH_TOKEN';\nvar from = 'whatsapp:+14155238886';\nvar to   = 'whatsapp:+91XXXXXXXXXX';\n\nvar body = '🚨 NEUROVIGILX EMERGENCY!\\n'\n  + 'Heart Rate: ' + msg.payload.heartRate + ' bpm\\n'\n  + 'Distance: '   + msg.payload.dist + ' cm\\n'\n  + 'SOS Button: ' + (msg.payload.sos ? 'YES' : 'NO') + '\\n'\n  + 'Location: '   + msg.payload.lat + '\\n'\n  + 'Time: '       + new Date().toLocaleString();\n\nmsg.url     = 'https://api.twilio.com/2010-04-01/Accounts/' + accountSid + '/Messages.json';\nmsg.method  = 'POST';\nmsg.payload = 'From=' + encodeURIComponent(from)\n  + '&To='   + encodeURIComponent(to)\n  + '&Body=' + encodeURIComponent(body);\nmsg.headers = {\n  'Content-Type': 'application/x-www-form-urlencoded',\n  'Authorization': 'Basic ' + Buffer.from(accountSid + ':' + authToken).toString('base64')\n};\nreturn msg;",
+    "wires": [["twilio_request"]]
+  },
+  {
+    "id": "twilio_request",
+    "type": "http request",
+    "z": "flow1",
+    "name": "Twilio API",
+    "method": "use",
+    "ret": "txt",
+    "wires": [["debug_twilio"]]
+  },
+  {
+    "id": "debug_twilio",
+    "type": "debug",
+    "z": "flow1",
+    "name": "Twilio Response",
+    "active": true,
+    "wires": []
+  },
+  {
+    "id": "http_res_sos",
+    "type": "http response",
+    "z": "flow1",
+    "name": "respond 200",
+    "statusCode": "200",
+    "wires": []
+  },
+  {
+    "id": "http_in_get",
+    "type": "http in",
+    "z": "flow1",
+    "name": "GET /get-data",
+    "url": "/get-data",
+    "method": "get",
+    "wires": [["retrieve_fn"]]
+  },
+  {
+    "id": "retrieve_fn",
+    "type": "function",
+    "z": "flow1",
+    "name": "retrieve data",
+    "func": "var data = flow.get('sensorData') || {heartRate:0,lat:0,dist:0,sos:false};\nmsg.payload = data;\nmsg.statusCode = 200;\nmsg.headers = {'Content-Type':'application/json','Access-Control-Allow-Origin':'*'};\nreturn msg;",
+    "wires": [["http_res_get"]]
+  },
+  {
+    "id": "http_res_get",
+    "type": "http response",
+    "z": "flow1",
+    "name": "respond data",
+    "statusCode": "200",
+    "wires": []
+  },
+  {
+    "id": "http_in_ping",
+    "type": "http in",
+    "z": "flow1",
+    "name": "GET /ping",
+    "url": "/ping",
+    "method": "get",
+    "wires": [["ping_fn"]]
+  },
+  {
+    "id": "ping_fn",
+    "type": "function",
+    "z": "flow1",
+    "name": "pong",
+    "func": "msg.payload = 'pong';\nmsg.statusCode = 200;\nreturn msg;",
+    "wires": [["http_res_ping"]]
+  },
+  {
+    "id": "http_res_ping",
+    "type": "http response",
+    "z": "flow1",
+    "name": "respond ping",
+    "statusCode": "200",
+    "wires": []
+  }
+]
